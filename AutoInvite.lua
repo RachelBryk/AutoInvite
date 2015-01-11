@@ -2,7 +2,7 @@
 
 _addon.author  = 'RachelB';
 _addon.name    = 'AutoInvite';
-_addon.version = '1.0';
+_addon.version = '1.1';
 
 require 'common'
 
@@ -10,6 +10,10 @@ local default_config =
 {
 	invite_keywords = {};
 	disband_keywords = {};
+	leader_keywords = {};
+	ally_keywords = {};
+	allydisband_keywords = {};
+	allyleader_keywords = {};
 	whitelist = {};
 };
 local config = default_config;
@@ -42,30 +46,51 @@ ashita.register_event('newchat', function(mode, chat)
 
 	name = chat:sub(start, length);
 
-	if #config.whitelist ~= 0 then
-		i = 1;
-		while i <= #config.whitelist do
-			if (config.whitelist[i] == name) then
-				n = 1;
-				while n <= #config.invite_keywords do
-					if chat:contains(config.invite_keywords[n]) then
-						print("Sending invite to " .. config.whitelist[i]);
-						AshitaCore:GetChatManager():QueueCommand("/pcmd add " .. config.whitelist[i], 1);
-						break;
-					end
-					n = n + 1;
-				end
-				n = 1;
-				while n <= #config.disband_keywords do
-					if chat:contains(config.disband_keywords[n]) then
-						print("Disbanding party.");
-						AshitaCore:GetChatManager():QueueCommand("/pcmd leave", 1);
-						break;
-					end
-					n = n + 1;
+	for i = 1, #config.whitelist, 1 do
+		if (config.whitelist[i] == name) then
+			for n = 1, #config.ally_keywords, 1 do
+				if chat:contains(config.ally_keywords[n]) then
+					print("Inviting " .. config.whitelist[i] .. " to alliance");
+					AshitaCore:GetChatManager():QueueCommand("/acmd add " .. config.whitelist[i], 1);
+					return false;
 				end
 			end
-			i = i + 1;
+			for n = 1, #config.allydisband_keywords, 1 do
+				if chat:contains(config.allydisband_keywords[n]) then
+					print("Disbanding from alliance.");
+					AshitaCore:GetChatManager():QueueCommand("/acmd leave", 1);
+					return false;
+				end
+			end
+			for n = 1, #config.allyleader_keywords, 1 do
+				if chat:contains(config.allyleader_keywords[n]) then
+					print("Giving alliance leader to " .. config.whitelist[i]);
+					AshitaCore:GetChatManager():QueueCommand("/acmd leader " .. config.whitelist[i], 1);
+					return false;
+				end
+			end
+			for n = 1, #config.invite_keywords, 1 do
+				if chat:contains(config.invite_keywords[n]) then
+					print("Sending invite to " .. config.whitelist[i]);
+					AshitaCore:GetChatManager():QueueCommand("/pcmd add " .. config.whitelist[i], 1);
+					return false;
+				end
+			end
+			for n = 1, #config.disband_keywords, 1 do
+				if chat:contains(config.disband_keywords[n]) then
+					print("Disbanding party.");
+					AshitaCore:GetChatManager():QueueCommand("/pcmd leave", 1);
+					return false;
+				end
+			end
+			for n = 1, #config.leader_keywords, 1 do
+				if chat:contains(config.leader_keywords[n]) then
+					print("Giving leader to " .. config.whitelist[i]);
+					AshitaCore:GetChatManager():QueueCommand("/pcmd leader " .. config.whitelist[i], 1);
+					return false;
+				end
+			end
+
 		end
 	end
 
@@ -97,6 +122,26 @@ ashita.register_event('command', function(cmd, nType)
 		if (args[3] == "disband") then
 			config.disband_keywords[#config.disband_keywords+1] = args [4]
 			print("Added " .. args[4] .. " to disband keyword list.");
+		end
+
+		if (args[3] == "leader") then
+			config.leader_keywords[#config.leader_keywords+1] = args [4]
+			print("Added " .. args[4] .. " to leader keyword list.");
+		end
+
+		if (args[3] == "ally") then
+			config.ally_keywords[#config.ally_keywords+1] = args [4]
+			print("Added " .. args[4] .. " to ally keyword list.");
+		end
+
+		if (args[3] == "disbandally") then
+			config.allydisband_keywords[#config.allydisband_keywords+1] = args [4]
+			print("Added " .. args[4] .. " to disband ally keyword list.");
+		end
+
+		if (args[3] == "allyleader") then
+			config.allyleader_keywords[#config.allyleader_keywords+1] = args [4]
+			print("Added " .. args[4] .. " to ally leader keyword list.");
 		end
 	end
 
