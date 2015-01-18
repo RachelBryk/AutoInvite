@@ -33,23 +33,23 @@ ashita.register_event('newchat', function(mode, chat)
 	end
 
 	start = chat:find("]"); -- find end of timestamp
-	length = chat:find(">") - 1;
+	length = chat:find(">") - 3;
 
 	if (start ~= nil) then
-		start = start + 4; -- 4 characters from end of timestamp to start of name
+		start = start + 6; -- 4 characters from end of timestamp to start of name
 	else
-		start = 1; -- no timestamp
+		start = 3; -- no timestamp
 	end
 	if length < start then -- no timestamp, but ] found within the tell...
-		start = 1;
+		start = 3;
 	end
 
 	name = chat:sub(start, length);
 
 	for i = 1, #config.whitelist, 1 do
-		if (config.whitelist[i] == name) then
+		if (name == config.whitelist[i]) then
 			for n = 1, #config.ally_keywords, 1 do
-				if chat:contains(config.ally_keywords[n]) then
+				if (chat:contains(config.ally_keywords[n])) then
 					print("Inviting " .. config.whitelist[i] .. " to alliance");
 					AshitaCore:GetChatManager():QueueCommand("/acmd add " .. config.whitelist[i], 1);
 					return false;
@@ -63,34 +63,33 @@ ashita.register_event('newchat', function(mode, chat)
 				end
 			end
 			for n = 1, #config.allyleader_keywords, 1 do
-				if chat:contains(config.allyleader_keywords[n]) then
+				if (chat:contains(config.allyleader_keywords[n])) then
 					print("Giving alliance leader to " .. config.whitelist[i]);
 					AshitaCore:GetChatManager():QueueCommand("/acmd leader " .. config.whitelist[i], 1);
 					return false;
 				end
 			end
 			for n = 1, #config.invite_keywords, 1 do
-				if chat:contains(config.invite_keywords[n]) then
+				if (chat:contains(config.invite_keywords[n])) then
 					print("Sending invite to " .. config.whitelist[i]);
 					AshitaCore:GetChatManager():QueueCommand("/pcmd add " .. config.whitelist[i], 1);
 					return false;
 				end
 			end
 			for n = 1, #config.disband_keywords, 1 do
-				if chat:contains(config.disband_keywords[n]) then
+				if (chat:contains(config.disband_keywords[n])) then
 					print("Disbanding party.");
 					AshitaCore:GetChatManager():QueueCommand("/pcmd leave", 1);
 					return false;
 				end
 			end
 			for n = 1, #config.leader_keywords, 1 do
-				if chat:contains(config.leader_keywords[n]) then
+				if (chat:contains(config.leader_keywords[n])) then
 					print("Giving leader to " .. config.whitelist[i]);
 					AshitaCore:GetChatManager():QueueCommand("/pcmd leader " .. config.whitelist[i], 1);
 					return false;
 				end
 			end
-
 		end
 	end
 
